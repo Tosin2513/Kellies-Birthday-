@@ -1,0 +1,518 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>The A–Z of Us — Romantic Countdown</title>
+  <style>
+    /* ===== Romantic theme: soft pinks, glow, handwritten accents ===== */
+    :root{
+      --bg:#fff6fb;
+      --card:#fff;
+      --accent:#ff6fa3;
+      --accent-2:#ffb3d1;
+      --muted:#8b6b7e;
+      --glass: rgba(255,255,255,0.7);
+      --shadow: 0 8px 24px rgba(139,106,126,0.12);
+    }
+    html,body{height:100%;margin:0;font-family: 'Trebuchet MS', system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;}
+    body{
+      background: linear-gradient(180deg,#fff6fb 0%, #fff0f6 100%);
+      color:#4b2d3f;
+      -webkit-font-smoothing:antialiased;
+      padding:24px;
+      display:flex;
+      justify-content:center;
+      align-items:flex-start;
+      gap:20px;
+    }
+
+    .container{max-width:1100px;width:100%;}
+    header{
+      display:flex;align-items:center;gap:16px;margin-bottom:22px;
+    }
+    .logo{
+      width:84px;height:84px;border-radius:18px;background:linear-gradient(135deg,var(--accent),var(--accent-2));
+      box-shadow: 0 6px 18px rgba(255,111,163,0.16);
+      display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:32px;
+      transform:rotate(-8deg);
+    }
+    h1{margin:0;font-size:22px;line-height:1.1;}
+    p.lead{margin:6px 0 0;color:var(--muted);font-size:14px;}
+
+    .top-row{display:flex;gap:12px;align-items:center;justify-content:space-between;margin-bottom:18px;}
+    .left {
+      display:flex;flex-direction:column;
+    }
+
+    .countdown{
+      display:flex;gap:8px;align-items:center;margin-top:10px;
+      background:var(--glass);padding:10px;border-radius:12px;box-shadow:var(--shadow);
+    }
+    .countdown .item{min-width:64px;text-align:center;}
+    .countdown .num{font-size:18px;font-weight:700;color:var(--accent);}
+
+    /* Grid of letters */
+    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:12px;margin-top:16px;}
+    .card{
+      background:var(--card);border-radius:12px;padding:12px;box-shadow:var(--shadow);min-height:110px;
+      display:flex;flex-direction:column;justify-content:space-between;position:relative;overflow:hidden;
+    }
+    .letter{font-size:28px;font-weight:800;color:var(--accent);letter-spacing:1px;}
+    .title{font-size:13px;margin-top:6px;color:#6a4656}
+    .locked {
+      position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,0.5),rgba(255,255,255,0.65));
+      display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;color:#a86d84;
+      backdrop-filter: blur(3px);
+    }
+    .unlocked-badge{position:absolute;right:10px;top:10px;background:linear-gradient(90deg,var(--accent),var(--accent-2));color:white;padding:6px 8px;border-radius:999px;font-size:12px;box-shadow:0 4px 10px rgba(255,111,163,0.18);}
+    .open-btn{background:transparent;border:2px solid var(--accent);color:var(--accent);padding:8px;border-radius:10px;font-weight:700;cursor:pointer;}
+    .open-btn:hover{background:var(--accent);color:white;transition:all .18s;}
+    footer.small{margin-top:18px;color:var(--muted);font-size:13px}
+
+    /* Modal */
+    .modal-backdrop{position:fixed;inset:0;background:rgba(11,7,9,0.46);display:none;align-items:center;justify-content:center;z-index:60}
+    .modal{background:linear-gradient(180deg,#fff 0%, #fff9fb 100%);padding:22px;border-radius:14px;max-width:720px;width:94%;box-shadow:0 20px 60px rgba(91,54,77,0.36);position:relative;}
+    .modal h2{margin-top:0;color:var(--accent);}
+    .close-btn{position:absolute;right:12px;top:8px;background:transparent;border:none;font-size:20px;cursor:pointer;color:#7b4f61}
+
+    /* music player */
+    .music{display:flex;align-items:center;gap:10px;background:var(--glass);padding:8px;border-radius:10px;}
+    input[type="text"], input[type="password"]{padding:8px;border-radius:8px;border:1px solid #f0dbe1;background:white;}
+    .admin {display:flex;gap:8px;align-items:center;}
+    .hint{font-size:12px;color:#92626f;margin-top:8px;}
+
+    @media (max-width:640px){
+      .grid{grid-template-columns:repeat(4,1fr)}
+      header{flex-direction:row;gap:12px}
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="logo">A–Z</div>
+      <div>
+        <h1>The A–Z of Us — 26 little virtual dates</h1>
+        <p class="lead" id="welcome-msg">Welcome to The A–Z of Us — 26 little adventures leading up to your special day 💕</p>
+        <div class="countdown" style="margin-top:10px;">
+          <div class="item"><div style="font-size:12px;color:#7b4f61">Days to Nov 17</div><div class="num" id="daysTo">—</div></div>
+          <div class="item"><div style="font-size:12px;color:#7b4f61">Today</div><div class="num" id="todayStr">—</div></div>
+        </div>
+      </div>
+    </header>
+
+    <div class="top-row">
+      <div class="music" title="Music">
+        <button id="playBtn">▶ Play music</button>
+        <div id="trackName" style="font-size:13px;color:#6a4656">No track loaded — you can paste an MP3 or YouTube link in Settings</div>
+      </div>
+
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div class="admin">
+          <input id="adminPass" type="password" placeholder="Admin pass"/>
+          <button id="unlockAll" class="open-btn">Unlock</button>
+        </div>
+      </div>
+    </div>
+
+    <main>
+      <div style="display:flex;gap:14px;align-items:flex-start;">
+        <section style="flex:1;">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <h3 style="margin:0;color:#6a4656">Letters</h3>
+            <div style="font-size:13px;color:var(--muted)">Auto-unlock by date • Manual unlock available</div>
+          </div>
+
+          <div class="grid" id="lettersGrid">
+            <!-- JS will populate letters here -->
+          </div>
+
+          <div class="hint">Tip: edit the <code>CONFIG</code> block at the top of this file to change dates, text, images, or the admin password.</div>
+        </section>
+
+        <aside style="width:320px;">
+          <div style="background:var(--card);border-radius:12px;padding:14px;box-shadow:var(--shadow);">
+            <h4 style="margin:0;color:var(--accent)">Settings</h4>
+            <div style="margin-top:10px;">
+              <label style="font-size:13px;color:var(--muted)">Welcome message</label><br/>
+              <input id="welcomeInput" type="text" style="width:100%;" />
+            </div>
+            <div style="margin-top:10px;">
+              <label style="font-size:13px;color:var(--muted)">Music URL (mp3 or YouTube)</label><br/>
+              <input id="musicInput" type="text" style="width:100%;" placeholder="https://..." />
+            </div>
+            <div style="margin-top:10px;display:flex;gap:8px;">
+              <button id="saveSettings" class="open-btn">Save</button>
+              <button id="generateWeekends" class="open-btn" style="background:transparent;color:var(--accent)">Weekend schedule</button>
+            </div>
+            <div style="margin-top:10px;font-size:12px;color:var(--muted)">
+              <strong>Start date:</strong> <span id="startDateText"></span><br/>
+              <strong>End date:</strong> Nov 17 (birthday) 💝
+            </div>
+          </div>
+
+          <div style="height:12px;"></div>
+
+          <div style="background:linear-gradient(90deg,var(--accent-2),#fff);padding:12px;border-radius:12px;box-shadow:var(--shadow);">
+            <strong style="color:#6a4656">Admin</strong>
+            <div style="margin-top:8px;font-size:13px;color:var(--muted)">Enter the admin password above (default in config) then click Unlock to manually reveal locked letters.</div>
+          </div>
+        </aside>
+      </div>
+    </main>
+
+    <footer class="small">Made with ❤️ — customize the messages and dates in the top <code>CONFIG</code> section of the file.</footer>
+  </div>
+
+  <!-- Modal for letter content -->
+  <div class="modal-backdrop" id="modalBackdrop">
+    <div class="modal" role="dialog" aria-modal="true">
+      <button class="close-btn" id="closeModal">✕</button>
+      <h2 id="modalLetter">A — Art Night</h2>
+      <div id="modalContent" style="color:#6a4656"></div>
+      <div style="margin-top:12px;">
+        <button id="modalAction" class="open-btn">Do the thing</button>
+      </div>
+    </div>
+  </div>
+
+  <audio id="bgAudio" preload="none"></audio>
+
+  <script>
+  /* ==========================
+     CONFIG — customize here
+     ========================== */
+  const CONFIG = {
+    startDate: "2025-10-22", // first letter date (YYYY-MM-DD)
+    birthdayDate: "2025-11-17",
+    welcomeMessage: "Welcome to The A–Z of Us — 26 little adventures leading up to your special day 💕",
+    adminPassword: "lovely123", // change this to something private
+    autoAssignSequential: true, // if true: letters will be assigned starting at startDate sequentially (one per day)
+    useWeekendSchedule: false, // if true, you can generate weekend-only dates with the helper button
+    // Optional default music (empty to start without)
+    musicUrl: "", // put an MP3 link or YouTube link here if you want (or paste in Settings later)
+    // Editable items for A–Z:
+    items: [
+      /* Example item structure. If autoAssignSequential=true, you only need letter,title,text,weekdayOnly(optional)
+         date can be left empty and will be auto-filled. */
+      { letter: "A", title: "Art Night", text: "Draw each other while on video — no pressure, just laughs. Try DoodleTogether or draw on a shared Zoom screen.", media: "" },
+      { letter: "B", title: "Breakfast Together", text: "Make or order breakfast and open a video call. Send a cute photo of your plates!", media: "" },
+      { letter: "C", title: "Compliment Jar", text: "Click below to reveal 10 compliments I wrote just for you.", media: "" },
+      { letter: "D", title: "Dreamboard", text: "Let's create a shared Pinterest board with future trip ideas and cozy home plans.", media: "" },
+      { letter: "E", title: "Emoji Story", text: "I made you a secret story told only in emojis. Can you decode it?", media: "" },
+      { letter: "F", title: "Favorite Songs", text: "Here's a shared Spotify playlist — add your top 3 songs and we'll listen together.", media: "" },
+      { letter: "G", title: "Game Night", text: "Gartic Phone or Words with Friends? Pick a game and we'll laugh for hours.", media: "" },
+      { letter: "H", title: "Heartfelt Letter", text: "A little letter I wrote for you. Read it when you need a smile.", media: "" },
+      { letter: "I", title: "Inside Jokes", text: "A slideshow of our funniest moments and screenshots — nostalgia incoming.", media: "" },
+      { letter: "J", title: "Just Us", text: "A mini photo collage of us — open it and let's reminisce.", media: "" },
+      { letter: "K", title: "Kind Words", text: "Voice notes: 3 short messages of appreciation. Press play to hear me.", media: "" },
+      { letter: "L", title: "Love Language", text: "A cute quiz: guess my love language and I'll guess yours.", media: "" },
+      { letter: "M", title: "Movie Night", text: "Pick a rom-com; we'll sync Play/Pause and watch with Teleparty or screenshare.", media: "" },
+      { letter: "N", title: "Note Hunt", text: "I hid short notes across this site — find them all and get a surprise!", media: "" },
+      { letter: "O", title: "Open When", text: "Virtual 'Open When' messages: open when you miss me, can't sleep, or want to smile.", media: "" },
+      { letter: "P", title: "Puzzle Date", text: "A custom crossword/quiz about us. How well do we know each other?", media: "" },
+      { letter: "Q", title: "Q&A", text: "10 deep questions — answer one per call and we'll learn more about each other.", media: "" },
+      { letter: "R", title: "Recipe Swap", text: "We each cook one dish on video and enjoy together — bonus if we pick the same recipe!", media: "" },
+      { letter: "S", title: "Song Dedication", text: "I recorded a small dedication — press play to hear it.", media: "" },
+      { letter: "T", title: "Throwback", text: "Old screenshots, texts, and photos — a timeline of our best moments.", media: "" },
+      { letter: "U", title: "Unplugged", text: "A long, phone-free call: just voice, stories, and time for us.", media: "" },
+      { letter: "V", title: "Virtual Trip", text: "Let's wander a new city together using Google Maps and plan an itinerary.", media: "" },
+      { letter: "W", title: "Wishlist", text: "A shared list of future adventures to add to over coffee and laughs.", media: "" },
+      { letter: "X", title: "eXtra Love", text: "A small surprise: a short poem and a digital card. ❤️", media: "" },
+      { letter: "Y", title: "Year in Review", text: "Highlights from this past year together — photos + silly captions.", media: "" },
+      { letter: "Z", title: "Zest for Us", text: "Happy birthday! A final video montage and a message from me to you.", media: "" }
+    ]
+  };
+
+  /* END CONFIG */
+  /* ========================== */
+
+  // ---------- Utilities ----------
+  const $ = sel => document.querySelector(sel);
+  const daysBetween = (a,b) => Math.floor((b - a) / (1000*60*60*24));
+  const iso = d => d.toISOString().slice(0,10);
+
+  // Parse dates
+  const START = new Date(CONFIG.startDate + "T00:00:00");
+  const BDAY = new Date(CONFIG.birthdayDate + "T00:00:00");
+
+  // If autoAssignSequential, fill dates from startDate onward (one per day).
+  function assignSequentialDates(items, startDate){
+    let d = new Date(startDate);
+    for(let i=0;i<items.length;i++){
+      items[i].date = iso(d);
+      d.setDate(d.getDate() + 1);
+    }
+  }
+
+  // Helper: generate weekend-only dates between start and birthday and map letters to them
+  function generateWeekendSchedule(items, startDate, endDate){
+    const weekends = [];
+    const cur = new Date(startDate);
+    const end = new Date(endDate);
+    while(cur <= end){
+      const day = cur.getDay(); // 0=Sun,6=Sat
+      if(day === 0 || day === 6) weekends.push(iso(cur));
+      cur.setDate(cur.getDate()+1);
+    }
+    // If there are fewer weekend days than items, fallback to sequential assignment
+    if(weekends.length < items.length){
+      assignSequentialDates(items, startDate);
+      return false;
+    }
+    for(let i=0;i<items.length;i++){
+      items[i].date = weekends[i];
+    }
+    return true;
+  }
+
+  // Initialize schedule
+  if(CONFIG.autoAssignSequential){
+    assignSequentialDates(CONFIG.items, START);
+  }
+
+  // DOM references
+  const lettersGrid = $("#lettersGrid");
+  const daysToEl = $("#daysTo");
+  const todayStrEl = $("#todayStr");
+  const welcomeMsgEl = $("#welcome-msg");
+  const welcomeInput = $("#welcomeInput");
+  const startDateText = $("#startDateText");
+  const musicInput = $("#musicInput");
+  const trackName = $("#trackName");
+  const bgAudio = $("#bgAudio");
+  const playBtn = $("#playBtn");
+  const adminPassInput = $("#adminPass");
+  const unlockAllBtn = $("#unlockAll");
+  const saveSettingsBtn = $("#saveSettings");
+  const generateWeekendsBtn = $("#generateWeekends");
+
+  // Show start date
+  startDateText.textContent = CONFIG.startDate;
+
+  // Load initial welcome & music
+  welcomeMsgEl.textContent = CONFIG.welcomeMessage;
+  welcomeInput.value = CONFIG.welcomeMessage;
+  musicInput.value = CONFIG.musicUrl || "";
+
+  // Populate grid
+  function renderGrid(){
+    lettersGrid.innerHTML = "";
+    const today = new Date();
+    todayStrEl.textContent = today.toLocaleDateString();
+
+    const daysTo = daysBetween(today, BDAY);
+    daysToEl.textContent = (daysTo >= 0) ? daysTo : 0;
+
+    CONFIG.items.forEach(item=>{
+      const card = document.createElement("div");
+      card.className = "card";
+      const letterEl = document.createElement("div");
+      letterEl.innerHTML = `<div class="letter">${item.letter}</div><div class="title">${item.title}</div>`;
+      card.appendChild(letterEl);
+
+      const dateBadge = document.createElement("div");
+      dateBadge.style.fontSize="12px";
+      dateBadge.style.color="var(--muted)";
+      dateBadge.textContent = item.date || "unscheduled";
+      card.appendChild(dateBadge);
+
+      // Determine if unlocked
+      let unlocked = false;
+      if(item.date){
+        const itemDate = new Date(item.date + "T00:00:00");
+        if(new Date().setHours(0,0,0,0) >= itemDate.setHours(0,0,0,0)) unlocked = true;
+      }
+      // Manual unlock override if item.unlocked === true
+      if(item.unlocked) unlocked = true;
+
+      if(unlocked){
+        const badge = document.createElement("div");
+        badge.className = "unlocked-badge";
+        badge.textContent = "Open";
+        card.appendChild(badge);
+        const btn = document.createElement("button");
+        btn.className = "open-btn";
+        btn.textContent = "View";
+        btn.onclick = ()=> openModal(item);
+        card.appendChild(btn);
+      } else {
+        const lock = document.createElement("div");
+        lock.className = "locked";
+        lock.innerText = `Locked\n${item.date ? item.date : ""}`;
+        card.appendChild(lock);
+
+        // But show 'preview' for admins
+        const preview = document.createElement("button");
+        preview.className = "open-btn";
+        preview.style.marginTop = "8px";
+        preview.textContent = "Preview";
+        preview.onclick = ()=> {
+          // small preview modal even if locked
+          openModal(item, {preview:true});
+        };
+        card.appendChild(preview);
+      }
+      lettersGrid.appendChild(card);
+    });
+  }
+
+  // Modal logic
+  const modalBackdrop = $("#modalBackdrop");
+  const modalLetter = $("#modalLetter");
+  const modalContent = $("#modalContent");
+  const modalAction = $("#modalAction");
+  const closeModalBtn = $("#closeModal");
+
+  function openModal(item, opts = {}){
+    modalLetter.textContent = `${item.letter} — ${item.title}`;
+    modalContent.innerHTML = `<div style="white-space:pre-wrap">${item.text || ""}</div>`;
+    if(item.media) {
+      // embed image or link
+      if(item.media.match(/\.(jpg|jpeg|png|gif)$/i)){
+        modalContent.innerHTML += `<div style="margin-top:8px"><img src="${item.media}" style="max-width:100%;border-radius:8px" /></div>`;
+      } else {
+        modalContent.innerHTML += `<div style="margin-top:8px"><a href="${item.media}" target="_blank">Open media</a></div>`;
+      }
+    }
+
+    // Special content for C = Compliment Jar example
+    if(item.letter === "C"){
+      // sample compliments (update these in the config by adding item.compliments array)
+      const compliments = item.compliments || [
+        "Your laugh makes everything better.",
+        "I admire your kindness.",
+        "You make me want to be better.",
+        "Your hug is my favorite place.",
+        "You have the most beautiful mind."
+      ];
+      modalContent.innerHTML += `<div style="margin-top:10px"><button id="revealCompliments" class="open-btn">Reveal compliments</button><div id="complimentsBox" style="margin-top:10px"></div></div>`;
+      setTimeout(()=> {
+        const revealBtn = document.getElementById("revealCompliments");
+        const box = document.getElementById("complimentsBox");
+        revealBtn.onclick = () => {
+          box.innerHTML = compliments.map(c => `<div style="padding:8px;border-radius:8px;background:linear-gradient(90deg,#fff,#fff9fb);margin-bottom:6px">${c}</div>`).join("");
+        };
+      },50);
+    }
+
+    modalAction.onclick = () => {
+      // If the item contains a link/playable media, open it; else simply close
+      if(item.actionUrl) window.open(item.actionUrl,"_blank");
+      else {
+        // small heart animation (visual reward)
+        modalAction.textContent = "Done ♥";
+        setTimeout(()=> modalAction.textContent = "Do the thing", 900);
+      }
+    };
+
+    modalBackdrop.style.display = "flex";
+
+    // If preview and locked, show a note
+    if(opts.preview){
+      modalContent.innerHTML = `<div style="color:#9b6e83;font-style:italic">Preview (this item is date-locked). You can unlock manually in Settings.</div><hr/>` + modalContent.innerHTML;
+    }
+  }
+
+  closeModalBtn.onclick = () => {
+    modalBackdrop.style.display = "none";
+  };
+
+  modalBackdrop.onclick = e => {
+    if(e.target === modalBackdrop) modalBackdrop.style.display = "none";
+  };
+
+  // Music controls
+  function setMusic(url){
+    if(!url){
+      bgAudio.pause();
+      bgAudio.src = "";
+      trackName.textContent = "No track loaded — paste an MP3 or YouTube link in Settings";
+      playBtn.textContent = "▶ Play music";
+      return;
+    }
+    if(url.includes("youtube.com") || url.includes("youtu.be")){
+      trackName.textContent = "YouTube track (click to open)";
+      playBtn.textContent = "Open YouTube";
+      playBtn.onclick = () => window.open(url,"_blank");
+      return;
+    }
+    // Assume direct audio file URL
+    bgAudio.src = url;
+    trackName.textContent = "Loaded track (press Play)";
+    playBtn.textContent = "▶ Play music";
+    playBtn.onclick = () => {
+      if(bgAudio.paused){
+        bgAudio.play().catch(err => alert("Playback blocked; please interact with the page or allow sound."));
+        playBtn.textContent = "⏸ Pause";
+      } else {
+        bgAudio.pause();
+        playBtn.textContent = "▶ Play music";
+      }
+    };
+  }
+  setMusic(CONFIG.musicUrl);
+
+  // Save settings button
+  saveSettingsBtn.onclick = () => {
+    CONFIG.welcomeMessage = welcomeInput.value || CONFIG.welcomeMessage;
+    CONFIG.musicUrl = musicInput.value || "";
+    welcomeMsgEl.textContent = CONFIG.welcomeMessage;
+    setMusic(CONFIG.musicUrl);
+    alert("Settings saved locally in this file session. To keep them permanent: edit the CONFIG block in the HTML file.");
+  };
+
+  // Unlock All (admin)
+  unlockAllBtn.onclick = () => {
+    const pass = adminPassInput.value || "";
+    if(pass === CONFIG.adminPassword){
+      // set unlocked flag on all items
+      CONFIG.items.forEach(it => it.unlocked = true);
+      renderGrid();
+      alert("All items unlocked for viewing.");
+    } else {
+      alert("Wrong admin password.");
+    }
+  };
+
+  // Generate weekend schedule button
+  generateWeekendsBtn.onclick = () => {
+    const ok = generateWeekendSchedule(CONFIG.items, CONFIG.startDate, CONFIG.birthdayDate);
+    if(ok) {
+      alert("Weekend schedule generated. Dates assigned to weekend days between start and birthday.");
+    } else {
+      alert("Not enough weekend days between start and birthday — assigned sequential days instead.");
+    }
+    renderGrid();
+  };
+
+  // Allow keyboard shortcut: A to show first unlocked etc (optional)
+  document.addEventListener("keydown", e => {
+    if(e.key === "z" && (e.ctrlKey || e.metaKey)){ // ctrl/cmd+z to open last
+      const last = CONFIG.items[CONFIG.items.length - 1];
+      openModal(last);
+    }
+  });
+
+  // Initial render
+  renderGrid();
+
+  // Expose a simple save-dump to console for quick editing
+  window._dumpConfig = () => console.log(JSON.stringify(CONFIG, null, 2));
+
+  // Auto-refresh the grid at midnight local time to unlock new items if needed
+  function msUntilMidnight(){
+    const now = new Date();
+    const next = new Date(now);
+    next.setHours(24,0,5,0);
+    return next - now;
+  }
+  setTimeout(()=> {
+    renderGrid();
+    setInterval(renderGrid, 1000*60*60); // hourly refresh after midnight
+  }, msUntilMidnight());
+
+  </script>
+</body>
+</html>
