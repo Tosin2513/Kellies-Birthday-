@@ -6,20 +6,28 @@
   <title>The A–Z of Us — Romantic Countdown</title>
   <style>
     /* ===== Romantic theme: soft pinks, glow, handwritten accents ===== */
-    :root{
-      --bg:#fff6fb;
-      --card:#fff;
-      --accent:#ff6fa3;
-      --accent-2:#ffb3d1;
-      --muted:#8b6b7e;
-      --glass: rgba(255,255,255,0.7);
-      --shadow: 0 8px 24px rgba(139,106,126,0.12);
-    }
-    html,body{height:100%;margin:0;font-family: 'Trebuchet MS', system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;}
-    body{
-      background: linear-gradient(180deg,#fff6fb 0%, #fff0f6 100%);
-      color:#4b2d3f;
-      -webkit-font-smoothing:antialiased;
+    :root {
+  --bg: #1a0000;          /* deep crimson backdrop */
+  --card: #2a0000;        /* darker red card background */
+  --accent: #8B0000;      /* main blood red accent */
+  --accent-2: #b30000;    /* brighter red gradient partner */
+  --muted: #cfa3a3;       /* soft rose-gray text */
+  --glass: rgba(43, 0, 0, 0.6); /* semi-transparent dark red overlay */
+  --shadow: 0 8px 24px rgba(139, 0, 0, 0.25);
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
+  font-family: 'Trebuchet MS', system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+}
+
+body {
+  background: linear-gradient(180deg, #330000 0%, #1a0000 100%);
+  color: #f4dcdc; /* light rose text for contrast */
+  -webkit-font-smoothing: antialiased;
+}
+      
       padding:24px;
       display:flex;
       justify-content:center;
