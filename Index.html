@@ -522,38 +522,48 @@ body {
   }, msUntilMidnight());
 
   </script>
-  <script>
-  // Create falling red petals
-  const createPetal = () => {
-    const petal = document.createElement('span');
-    petal.classList.add('petal');
-    petal.style.left = Math.random() * 100 + 'vw';
-    petal.style.animationDuration = Math.random() * 3 + 2 + 's';
-    document.body.appendChild(petal);
-    setTimeout(() => petal.remove(), 5000);
-  };
-  setInterval(createPetal, 300);
-</script>
+<!-- 🌹 Falling Rose Petals -->
 <style>
-  .petal {
-    position: fixed;
-    top: -10px;
-    width: 12px;
-    height: 12px;
-    background: radial-gradient(circle, #8B0000 0%, #4b0000 80%);
-    border-radius: 50%;
-    opacity: 0.8;
-    animation: fall linear forwards;
-    pointer-events: none;
-    z-index: 9999;
-  }
+.petal {
+  position: fixed;
+  top: -10px;
+  width: 22px;
+  height: 20px;
+  background: radial-gradient(ellipse at center, #ff3b3b 0%, #8B0000 70%);
+  border-radius: 60% 70% 60% 70%;
+  opacity: 0.9;
+  transform: rotate(0deg);
+  animation: fall linear forwards;
+  pointer-events: none;
+  z-index: 9999;
+}
 
-  @keyframes fall {
-    to {
-      transform: translateY(100vh) rotate(720deg);
-      opacity: 0;
-    }
+@keyframes fall {
+  0% {
+    transform: translateY(0) rotate(0deg);
+    opacity: 1;
   }
+  100% {
+    transform: translateY(110vh) rotate(720deg);
+    opacity: 0;
+  }
+}
 </style>
+
+<script>
+function createPetal() {
+  const petal = document.createElement("div");
+  petal.className = "petal";
+  petal.style.left = Math.random() * 100 + "vw";
+  petal.style.animationDuration = 4 + Math.random() * 3 + "s"; // vary fall speed
+  petal.style.transform = `rotate(${Math.random() * 360}deg)`;
+  petal.style.opacity = 0.8 + Math.random() * 0.2;
+  document.body.appendChild(petal);
+  setTimeout(() => petal.remove(), 7000); // cleanup
+}
+
+// spawn petals continuously
+setInterval(createPetal, 350);
+</script>
 </body>
 </html>
