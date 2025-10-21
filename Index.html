@@ -7,36 +7,35 @@
   <style>
     /* ===== Romantic theme: soft pinks, glow, handwritten accents ===== */
     :root {
-  --bg: #1a0000;          /* deep crimson backdrop */
-  --card: #2a0000;        /* darker red card background */
-  --accent: #8B0000;      /* main blood red accent */
-  --accent-2: #b30000;    /* brighter red gradient partner */
-  --muted: #cfa3a3;       /* soft rose-gray text */
-  --glass: rgba(43, 0, 0, 0.6); /* semi-transparent dark red overlay */
-  --shadow: 0 8px 24px rgba(139, 0, 0, 0.25);
-}
+      --bg: #1a0000;
+      --card: #2a0000;
+      --accent: #8B0000;
+      --accent-2: #b30000;
+      --muted: #cfa3a3;
+      --glass: rgba(43, 0, 0, 0.6);
+      --shadow: 0 8px 24px rgba(139, 0, 0, 0.25);
+    }
 
-html, body {
-  height: 100%;
-  margin: 0;
-  font-family: 'Trebuchet MS', system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-}
+    html, body {
+      height: 100%;
+      margin: 0;
+      font-family: 'Trebuchet MS', system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    }
 
-body {
-  background: linear-gradient(180deg, #330000 0%, #1a0000 100%);
-  color: #f4dcdc; /* light rose text for contrast */
-  -webkit-font-smoothing: antialiased;
-    padding:24px;
+    body {
+      background: linear-gradient(180deg, #330000 0%, #1a0000 100%);
+      color: #f4dcdc; /* light rose text for contrast */
+      -webkit-font-smoothing: antialiased;
+      padding:24px;
       display:flex;
       justify-content:center;
       align-items:flex-start;
       gap:20px;
+      overflow-x:hidden;
     }
 
     .container{max-width:1100px;width:100%;}
-    header{
-      display:flex;align-items:center;gap:16px;margin-bottom:22px;
-    }
+    header{display:flex;align-items:center;gap:16px;margin-bottom:22px;}
     .logo{
       width:84px;height:84px;border-radius:18px;background:linear-gradient(135deg,var(--accent),var(--accent-2));
       box-shadow: 0 6px 18px rgba(255,111,163,0.16);
@@ -47,12 +46,9 @@ body {
     p.lead{margin:6px 0 0;color:var(--muted);font-size:14px;}
 
     .top-row{display:flex;gap:12px;align-items:center;justify-content:space-between;margin-bottom:18px;}
-    .left {
-      display:flex;flex-direction:column;
-    }
+    .left { display:flex;flex-direction:column; }
 
-    .countdown{
-      display:flex;gap:8px;align-items:center;margin-top:10px;
+    .countdown{ display:flex;gap:8px;align-items:center;margin-top:10px;
       background:var(--glass);padding:10px;border-radius:12px;box-shadow:var(--shadow);
     }
     .countdown .item{min-width:64px;text-align:center;}
@@ -70,8 +66,13 @@ body {
       position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,0.5),rgba(255,255,255,0.65));
       display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;color:#a86d84;
       backdrop-filter: blur(3px);
+      text-align:center;
+      padding:8px;
     }
-    .unlocked-badge{position:absolute;right:10px;top:10px;background:linear-gradient(90deg,var(--accent),var(--accent-2));color:white;padding:6px 8px;border-radius:999px;font-size:12px;box-shadow:0 4px 10px rgba(255,111,163,0.18);}
+    .unlocked-badge{
+      position:absolute;right:10px;top:10px;background:linear-gradient(90deg,var(--accent),var(--accent-2));
+      color:white;padding:6px 8px;border-radius:999px;font-size:12px;box-shadow:0 4px 12px rgba(179,0,0,0.35);
+    }
     .open-btn{background:transparent;border:2px solid var(--accent);color:var(--accent);padding:8px;border-radius:10px;font-weight:700;cursor:pointer;}
     .open-btn:hover{background:var(--accent);color:white;transition:all .18s;}
     footer.small{margin-top:18px;color:var(--muted);font-size:13px}
@@ -87,10 +88,22 @@ body {
     input[type="text"], input[type="password"]{padding:8px;border-radius:8px;border:1px solid #f0dbe1;background:white;}
     .admin {display:flex;gap:8px;align-items:center;}
     .hint{font-size:12px;color:#92626f;margin-top:8px;}
+    #musicPlayerContainer{min-width:240px;min-height:56px}
+    .spotify-iframe{border-radius:8px;overflow:hidden;border:0;width:300px;height:80px}
+    .spotify-overlay{position:relative;display:flex;align-items:center;gap:8px}
+    .spotify-click-to-play{background:rgba(0,0,0,0.5);color:white;padding:6px 10px;border-radius:8px;cursor:pointer;border:0}
+
+    /* falling petals */
+    .petal{position:fixed;top:-10vh;pointer-events:none;z-index:50;opacity:0.9;transform-origin:center;will-change:transform,opacity;}
+    @keyframes fall {
+      0%{transform: translateY(-10vh) rotate(0deg) translateX(0);}
+      100%{transform: translateY(110vh) rotate(360deg) translateX(30px);}
+    }
 
     @media (max-width:640px){
       .grid{grid-template-columns:repeat(4,1fr)}
       header{flex-direction:row;gap:12px}
+      .spotify-iframe{width:220px;height:70px}
     }
   </style>
 </head>
@@ -111,7 +124,9 @@ body {
     <div class="top-row">
       <div class="music" title="Music">
         <button id="playBtn">▶ Play music</button>
-        <div id="trackName" style="font-size:13px;color:#6a4656">No track loaded — you can paste an MP3 or YouTube link in Settings</div>
+        <div id="musicPlayerContainer">
+          <div id="trackName" style="font-size:13px;color:#6a4656">No track loaded — paste an MP3 or Spotify link in Settings</div>
+        </div>
       </div>
 
       <div style="display:flex;align-items:center;gap:10px;">
@@ -145,8 +160,8 @@ body {
               <input id="welcomeInput" type="text" style="width:100%;" />
             </div>
             <div style="margin-top:10px;">
-              <label style="font-size:13px;color:var(--muted)">Music URL (mp3 or YouTube)</label><br/>
-              <input id="musicInput" type="text" style="width:100%;" placeholder="https://..." />
+              <label style="font-size:13px;color:var(--muted)">Music URL (mp3 or Spotify link)</label><br/>
+              <input id="musicInput" type="text" style="width:100%;" placeholder="https://open.spotify.com/track/... or https://.../file.mp3" />
             </div>
             <div style="margin-top:10px;display:flex;gap:8px;">
               <button id="saveSettings" class="open-btn">Save</button>
@@ -197,37 +212,35 @@ body {
     autoAssignSequential: true, // if true: letters will be assigned starting at startDate sequentially (one per day)
     useWeekendSchedule: false, // if true, you can generate weekend-only dates with the helper button
     // Optional default music (empty to start without)
-    musicUrl: "", // put an MP3 link or YouTube link here if you want (or paste in Settings later)
+    musicUrl: "", // put an MP3 link or Spotify link here if you want (or paste in Settings later)
     // Editable items for A–Z:
     items: [
-      /* Example item structure. If autoAssignSequential=true, you only need letter,title,text,weekdayOnly(optional)
-         date can be left empty and will be auto-filled. */
-      { letter: "A", title: "A message from me", text: "Hey baby, I just wanted to start this A–Z journey by reminding you how much I love you. Every letter is a tiny piece of us , starting here, with me thinking about you 💕", media: "https://drive.google.com/file/d/PUT-VIDEO-LINK-HERE/view?usp=sharing,},
-      { letter: "B", title: "Because of you", text: "Because of you, I smile more, laugh harder, and love deeper. Every little thing you do makes my world brighter 💫", media: "https://drive.google.com/file/d/PUT-VIDEO-LINK-HERE/view?usp=sharing" },
-      { letter: "C", title: "Compliment Jar", text: "You deserve to be reminded just how amazing you are. Click below and let me tell you all the things I adore about you 💕", media: "" },
-      { letter: "D", title: "Do not disturb", text: "Pick a date and time, no multitasking 🫵 let's have a deep conversation we haven't had one in a while. ", media: "https://drive.google.com/file/d/PUT-YOUR-VIDEO-LINK-HERE/view?usp=sharing" },
-      { letter: "E", title: "Emoji Story", text: "I made you a secret story told only in emojis. Can you decode it?", media: "" },
-      { letter: "F", title: "Favorite Songs", text: "Here's a shared Spotify playlist — add your top 3 songs and we'll listen together.", media: "" },
-      { letter: "G", title: "Game Night", text: "Gartic Phone or Words with Friends? Pick a game and we'll laugh for hours.", media: "" },
-      { letter: "H", title: "Heartfelt Letter", text: "A little letter I wrote for you. Read it when you need a smile.", media: "" },
-      { letter: "I", title: "Inside Jokes", text: "A slideshow of our funniest moments and screenshots — nostalgia incoming.", media: "" },
-      { letter: "J", title: "Just Us", text: "A mini photo collage of us — open it and let's reminisce.", media: "" },
-      { letter: "K", title: "Kind Words", text: "Voice notes: 3 short messages of appreciation. Press play to hear me.", media: "" },
-      { letter: "L", title: "Love Language", text: "A cute quiz: guess my love language and I'll guess yours.", media: "" },
-      { letter: "M", title: "Movie Night", text: "Pick a rom-com; we'll sync Play/Pause and watch with Teleparty or screenshare.", media: "" },
-      { letter: "N", title: "Note Hunt", text: "I hid short notes across this site — find them all and get a surprise!", media: "" },
-      { letter: "O", title: "Open When", text: "Virtual 'Open When' messages: open when you miss me, can't sleep, or want to smile.", media: "" },
-      { letter: "P", title: "Puzzle Date", text: "A custom crossword/quiz about us. How well do we know each other?", media: "" },
-      { letter: "Q", title: "Q&A", text: "10 deep questions — answer one per call and we'll learn more about each other.", media: "" },
-      { letter: "R", title: "Recipe Swap", text: "We each cook one dish on video and enjoy together — bonus if we pick the same recipe!", media: "" },
-      { letter: "S", title: "Song Dedication", text: "I recorded a small dedication — press play to hear it.", media: "" },
-      { letter: "T", title: "Throwback", text: "Old screenshots, texts, and photos — a timeline of our best moments.", media: "" },
-      { letter: "U", title: "Unplugged", text: "A long, phone-free call: just voice, stories, and time for us.", media: "" },
-      { letter: "V", title: "Virtual Trip", text: "Let's wander a new city together using Google Maps and plan an itinerary.", media: "" },
-      { letter: "W", title: "Wishlist", text: "A shared list of future adventures to add to over coffee and laughs.", media: "" },
-      { letter: "X", title: "eXtra Love", text: "A small surprise: a short poem and a digital card. ❤️", media: "" },
-      { letter: "Y", title: "Year in Review", text: "Highlights from this past year together — photos + silly captions.", media: "" },
-      { letter: "Z", title: "Zest for Us", text: "Happy birthday! A final video montage and a message from me to you.", media: "" }
+      { letter: "A", title: "A message from me", text: "Hey baby — I just wanted to start this A–Z journey by reminding you how much I love you." },
+      { letter: "B", title: "Because of you", text: "Because of you, I smile more and love deeper." },
+      { letter: "C", title: "Compliment Jar", text: "You deserve to be reminded how amazing you are. Click below!" },
+      { letter: "D", title: "Do not disturb", text: "Pick a date and time, no multitasking — let's talk." },
+      { letter: "E", title: "Emoji Story", text: "A secret story told in emojis — can you decode it?" },
+      { letter: "F", title: "Favorite Songs", text: "Here's a shared playlist — add your top 3 songs." },
+      { letter: "G", title: "Game Night", text: "Pick a game and we'll laugh for hours." },
+      { letter: "H", title: "Heartfelt Letter", text: "A little letter I wrote for you. Read it when you need a smile." },
+      { letter: "I", title: "Inside Jokes", text: "A slideshow of our funniest moments." },
+      { letter: "J", title: "Just Us", text: "A mini photo collage of us — let's reminisce." },
+      { letter: "K", title: "Kind Words", text: "Voice notes: a few short messages of appreciation." },
+      { letter: "L", title: "Love Language", text: "A cute quiz: guess my love language and I'll guess yours." },
+      { letter: "M", title: "Movie Night", text: "Pick a rom-com; we'll sync Play/Pause and watch with Teleparty or screenshare." },
+      { letter: "N", title: "Note Hunt", text: "I hid short notes across this site — find them all!" },
+      { letter: "O", title: "Open When", text: "Virtual 'Open When' messages to open later." },
+      { letter: "P", title: "Puzzle Date", text: "A custom crossword/quiz about us." },
+      { letter: "Q", title: "Q&A", text: "10 deep questions — answer one per call and we'll learn more about each other." },
+      { letter: "R", title: "Recipe Swap", text: "We each cook one dish on video and enjoy together — bonus if we pick the same recipe!" },
+      { letter: "S", title: "Song Dedication", text: "I recorded a small dedication — press play to hear it." },
+      { letter: "T", title: "Throwback", text: "Old screenshots, texts, and photos — a timeline of our best moments." },
+      { letter: "U", title: "Unplugged", text: "A long, phone-free call: just voice, stories, and time for us." },
+      { letter: "V", title: "Virtual Trip", text: "Let's wander a new city together using Google Maps and plan an itinerary." },
+      { letter: "W", title: "Wishlist", text: "A shared list of future adventures to add to over coffee and laughs." },
+      { letter: "X", title: "eXtra Love", text: "A small surprise: a short poem and a digital card. ❤️" },
+      { letter: "Y", title: "Year in Review", text: "Highlights from this past year together — photos + silly captions." },
+      { letter: "Z", title: "Zest for Us", text: "Happy birthday! A final video montage and a message from me to you." }
     ]
   };
 
@@ -293,6 +306,7 @@ body {
   const unlockAllBtn = $("#unlockAll");
   const saveSettingsBtn = $("#saveSettings");
   const generateWeekendsBtn = $("#generateWeekends");
+  const musicPlayerContainer = $("#musicPlayerContainer");
 
   // Show start date
   startDateText.textContent = CONFIG.startDate;
@@ -302,100 +316,110 @@ body {
   welcomeInput.value = CONFIG.welcomeMessage;
   musicInput.value = CONFIG.musicUrl || "";
 
-  // Populate grid
-  function renderGrid(){
-    lettersGrid.innerHTML = "";
-    const today = new Date();
-    todayStrEl.textContent = today.toLocaleDateString();
-
-    const daysTo = daysBetween(today, BDAY);
-    daysToEl.textContent = (daysTo >= 0) ? daysTo : 0;
-
-    CONFIG.items.forEach(item=>{
-      const card = document.createElement("div");
-      card.className = "card";
-      const letterEl = document.createElement("div");
-      letterEl.innerHTML = `<div class="letter">${item.letter}</div><div class="title">${item.title}</div>`;
-      card.appendChild(letterEl);
-
-      const dateBadge = document.createElement("div");
-      dateBadge.style.fontSize="12px";
-      dateBadge.style.color="var(--muted)";
-      dateBadge.textContent = item.date || "unscheduled";
-      card.appendChild(dateBadge);
-
-      // Determine if unlocked
-      let unlocked = false;
-      if(item.date){
-        const itemDate = new Date(item.date + "T00:00:00");
-        if(new Date().setHours(0,0,0,0) >= itemDate.setHours(0,0,0,0)) unlocked = true;
+  // Helpers for Spotify detection and embed URL
+  function parseSpotifyUrl(url){
+    try{
+      const u = new URL(url);
+      // open.spotify.com links
+      if(u.hostname.includes("spotify.com") || u.hostname.includes("open.spotify.com")){
+        const parts = u.pathname.split('/').filter(Boolean); // e.g. ["track","<id>"]
+        if(parts.length >= 2){
+          return {host:"spotify", type:parts[0], id:parts[1]};
+        }
       }
-      // Manual unlock override if item.unlocked === true
-      if(item.unlocked) unlocked = true;
-
-      if(unlocked){
-        const badge = document.createElement("div");
-        badge.className = "unlocked-badge";
-        badge.textContent = "Open";
-        card.appendChild(badge);
-        const btn = document.createElement("button");
-        btn.className = "open-btn";
-        btn.textContent = "View";
-        btn.onclick = ()=> openModal(item);
-        card.appendChild(btn);
-      } else {
-        const lock = document.createElement("div");
-        lock.className = "locked";
-        lock.innerText = `Locked\n${item.date ? item.date : ""}`;
-        card.appendChild(lock);
-
-        // But show 'preview' for admins
-        const preview = document.createElement("button");
-        preview.className = "open-btn";
-        preview.style.marginTop = "8px";
-        preview.textContent = "Preview";
-        preview.onclick = ()=> {
-          // small preview modal even if locked
-          openModal(item, {preview:true});
-        };
-        card.appendChild(preview);
+      // spotify:track:... uri
+      if(url.startsWith("spotify:")){
+        const p = url.split(':');
+        if(p.length >= 3) return {host:"spotify", type:p[1], id:p[2]};
       }
-      lettersGrid.appendChild(card);
-    });
+    }catch(e){}
+    return null;
   }
 
-  // Modal logic
-  const modalBackdrop = $("#modalBackdrop");
-  const modalLetter = $("#modalLetter");
-  const modalContent = $("#modalContent");
-  const modalAction = $("#modalAction");
-  const closeModalBtn = $("#closeModal");
+  function spotifyEmbedUrl(parsed){
+    if(!parsed) return null;
+    return `https://open.spotify.com/embed/${parsed.type}/${parsed.id}`;
+  }
 
-  function openModal(item, opts = {}){
-    modalLetter.textContent = `${item.letter} — ${item.title}`;
-    modalContent.innerHTML = `<div style="white-space:pre-wrap">${item.text || ""}</div>`;
-    if(item.media) {
-      // embed image or link
-      if(item.media.match(/\.(jpg|jpeg|png|gif)$/i)){
-        modalContent.innerHTML += `<div style="margin-top:8px"><img src="${item.media}" style="max-width:100%;border-radius:8px" /></div>`;
-      } else {
-        modalContent.innerHTML += `<div style="margin-top:8px"><a href="${item.media}" target="_blank">Open media</a></div>`;
-      }
+  // Clear music UI
+  function clearMusicUI(){
+    musicPlayerContainer.innerHTML = '';
+    bgAudio.pause();
+    bgAudio.removeAttribute('src');
+    playBtn.textContent = "▶ Play";
+  }
+
+  // Load music: supports MP3 direct links and Spotify links (embed)
+  // autoplayRequested: boolean (try to autoplay on load; may be blocked by browser for cross-origin embeds)
+  function loadMusic(url, autoplayRequested = false){
+    clearMusicUI();
+    const trimmed = (url || "").trim();
+    if(!trimmed){
+      trackName.textContent = "No track loaded — paste an MP3 or Spotify link in Settings";
+      return;
     }
 
-    // Special content for C = Compliment Jar example
-    if(item.letter === "C"){
-      // sample compliments (update these in the config by adding item.compliments array)
-      const compliments = item.compliments || [
-        "Your laugh makes everything better.",
-        "I admire your kindness.",
-        "You make me want to be better.",
-        "Your hug is my favorite place.",
-        "You have the most beautiful mind."
-      ];
-      modalContent.innerHTML += `<div style="margin-top:10px"><button id="revealCompliments" class="open-btn">Reveal compliments</button><div id="complimentsBox" style="margin-top:10px"></div></div>`;
-      setTimeout(()=> {
-        const revealBtn = document.getElementById("revealCompliments");
-        const box = document.getElementById("complimentsBox");
-        revealBtn.onclick = () => {
-          box.innerHTML
+    // MP3 handling (native audio element; autoplay more reliable)
+    if(/\.(mp3)(\?.*)?$/i.test(trimmed)){
+      bgAudio.src = trimmed;
+      trackName.textContent = trimmed.split('/').pop();
+      // attach simple play/pause
+      playBtn.onclick = () => {
+        if(bgAudio.paused){
+          bgAudio.play().catch(()=> alert("Autoplay prevented — interact with the page then press Play."));
+          playBtn.textContent = "⏸ Pause";
+        } else {
+          bgAudio.pause();
+          playBtn.textContent = "▶ Play";
+        }
+      };
+      if(autoplayRequested){
+        // try to autoplay
+        bgAudio.play().then(()=> { playBtn.textContent = "⏸ Pause"; }).catch(()=> {
+          // failed - wait for user interaction
+          playBtn.textContent = "▶ Play";
+          document.addEventListener("click", function once(){ bgAudio.play().then(()=>{ playBtn.textContent="⏸ Pause"; }).catch(()=>{}); document.removeEventListener("click", once); });
+        });
+      }
+      return;
+    }
+
+    // Spotify handling
+    const parsed = parseSpotifyUrl(trimmed);
+    if(parsed){
+      const embedSrc = spotifyEmbedUrl(parsed);
+      // create iframe
+      const iframe = document.createElement("iframe");
+      iframe.className = "spotify-iframe";
+      // Append autoplay hint param — browsers will often block autoplay for cross-origin iframes.
+      iframe.src = embedSrc + (autoplayRequested ? "?utm_source=generator&autoplay=1" : "?utm_source=generator");
+      iframe.width = "300";
+      iframe.height = "80";
+      iframe.allow = "autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture";
+      iframe.frameBorder = "0";
+      musicPlayerContainer.appendChild(iframe);
+
+      // show track name if possible (we only have type/id)
+      trackName.textContent = `${parsed.type} • ${parsed.id}`;
+
+      // Play button behavior: when clicked, focus iframe (user gesture) to enable playback in many browsers
+      playBtn.onclick = () => {
+        try{
+          iframe.contentWindow && iframe.contentWindow.focus && iframe.contentWindow.focus();
+        }catch(e){}
+        const directUrl = `https://open.spotify.com/${parsed.type}/${parsed.id}`;
+        const opened = window.open(directUrl, "_blank");
+        if(opened) opened.focus();
+      };
+
+      // If autoplay was requested, attempt to nudge playback: browsers will likely block, so we show a click prompt
+      if(autoplayRequested){
+        const prompt = document.createElement("div");
+        prompt.className = "spotify-overlay";
+        prompt.innerHTML = `<button class="spotify-click-to-play">Tap to play Spotify</button><span style="font-size:12px;color:var(--muted);margin-left:8px">Autoplay may be blocked — click to open Spotify player.</span>`;
+        musicPlayerContainer.appendChild(prompt);
+        const btn = prompt.querySelector(".spotify-click-to-play");
+        btn.onclick = () => {
+          window.open(`https://open.spotify.com/${parsed.type}/${parsed.id}`, "_blank");
+        };
+    
