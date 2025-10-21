@@ -619,5 +619,31 @@ document.addEventListener("click", function once() {
 });
     
   </script>
+  <!-- 🎵 Music Play Button -->
+<button id="musicButton" style="
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: #ff69b4;
+  color: white;
+  border: none;
+  padding: 12px 18px;
+  border-radius: 30px;
+  font-size: 16px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+  cursor: pointer;
+  z-index: 9999;
+">
+  🎵 Tap to Play Music
+</button>
+
+<!-- 🎶 Music Autoplay Script -->
+<script>
+document.getElementById("musicButton").addEventListener("click", function() {
+  loadMusic(CONFIG.musicUrl, true);
+  this.style.display = "none"; // Hides button after playing
+});
+</script>
+ 
 </body>
 </html>
