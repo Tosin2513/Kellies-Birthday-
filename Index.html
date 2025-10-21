@@ -612,7 +612,12 @@
 
   // Update countdown every minute
   setInterval(updateCountdown, 60*1000);
-
+// Autoplay the music after the first click (to bypass browser restrictions)
+document.addEventListener("click", function once() {
+  loadMusic(CONFIG.musicUrl, true);
+  document.removeEventListener("click", once);
+});
+    
   </script>
 </body>
 </html>
