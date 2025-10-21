@@ -94,10 +94,11 @@
     .spotify-click-to-play{background:rgba(0,0,0,0.5);color:white;padding:6px 10px;border-radius:8px;cursor:pointer;border:0}
 
     /* falling petals */
-    .petal{position:fixed;top:-10vh;pointer-events:none;z-index:50;opacity:0.9;transform-origin:center;will-change:transform,opacity;}
+    .petal{position:fixed;top:-10vh;pointer-events:none;z-index:50;opacity:0.95;transform-origin:center;will-change:transform,opacity;}
     @keyframes fall {
-      0%{transform: translateY(-10vh) rotate(0deg) translateX(0);} 
-      100%{transform: translateY(110vh) rotate(360deg) translateX(30px);} 
+      0%{transform: translateY(-10vh) rotate(0deg) translateX(0); opacity:1;} 
+      90%{opacity:0.95;}
+      100%{transform: translateY(110vh) rotate(360deg) translateX(30px); opacity:0;}
     }
 
     @media (max-width:640px){
@@ -215,7 +216,7 @@
     musicUrl: "", // put an MP3 link or Spotify link here if you want (or paste in Settings later)
     // Editable items for A–Z:
     items: [
-      { letter: "A", title: "A message from me", text: "Hey baby — I just wanted to start this A–Z journey by reminding you how much I love you." },
+      { letter: "A", title: "A message from me", text: "Hey baby — I just wanted to start this A–Z journey by reminding you how much I love you.<br/><br/><a href=\"https://drive.google.com/file/d/1YQq4AI71qItfsO0qwPld98S7ux83hY4X/view?usp=drivesdk\" target=\"_blank\" rel=\"noopener\">Open the surprise (Drive)</a>" },
       { letter: "B", title: "Because of you", text: "Because of you, I smile more and love deeper." },
       { letter: "C", title: "Compliment Jar", text: "You deserve to be reminded how amazing you are. Click below!" },
       { letter: "D", title: "Do not disturb", text: "Pick a date and time, no multitasking — let's talk." },
@@ -250,7 +251,15 @@
   // ---------- Utilities ----------
   const $ = sel => document.querySelector(sel);
   const daysBetween = (a,b) => Math.floor((b - a) / (1000*60*60*24));
-  const iso = d => d.toISOString().slice(0,10);
+
+  // Use a local ISO date (YYYY-MM-DD) built from local date components to avoid timezone shifts
+  const localISO = d => {
+    if(!(d instanceof Date)) d = new Date(d);
+    const y = d.getFullYear();
+    const m = String(d.getMonth()+1).padStart(2,'0');
+    const day = String(d.getDate()).padStart(2,'0');
+    return `${y}-${m}-${day}`;
+  };
 
   // Parse dates
   const START = new Date(CONFIG.startDate + "T00:00:00");
@@ -260,7 +269,7 @@
   function assignSequentialDates(items, startDate){
     let d = new Date(startDate);
     for(let i=0;i<items.length;i++){
-      items[i].date = iso(d);
+      items[i].date = localISO(d);
       d.setDate(d.getDate() + 1);
     }
   }
@@ -272,7 +281,7 @@
     const end = new Date(endDate);
     while(cur <= end){
       const day = cur.getDay(); // 0=Sun,6=Sat
-      if(day === 0 || day === 6) weekends.push(iso(cur));
+      if(day === 0 || day === 6) weekends.push(localISO(cur));
       cur.setDate(cur.getDate()+1);
     }
     // If there are fewer weekend days than items, fallback to sequential assignment
@@ -365,7 +374,7 @@
     }
 
     // MP3 handling (native audio element; autoplay more reliable)
-    if(/\.(mp3)(\?.*)?$/i.test(trimmed)){
+    if(/\.(mp3)(\?.*)?$/i.test(trimmed)){ 
       bgAudio.src = trimmed;
       trackName.textContent = trimmed.split('/').pop();
       // attach simple play/pause
@@ -421,7 +430,7 @@
       if(autoplayRequested){
         const prompt = document.createElement("div");
         prompt.className = "spotify-overlay";
-        prompt.innerHTML = `<button class=\"spotify-click-to-play\">Tap to play Spotify</button><span style=\"font-size:12px;color:var(--muted);margin-left:8px\">Autoplay may be blocked — click to open in Spotify</span>`;
+        prompt.innerHTML = `<button class="spotify-click-to-play">Tap to play Spotify</button><span style="font-size:12px;color:var(--muted);margin-left:8px">Autoplay may be blocked — click to open Spotify</span>`;
         musicPlayerContainer.appendChild(prompt);
         const btn = prompt.querySelector(".spotify-click-to-play");
         btn.onclick = () => {
@@ -437,13 +446,15 @@
 
   // ---------- UI: letters rendering, modal, settings ----------
   function todayISO(){
-    return iso(new Date());
+    return localISO(new Date());
   }
 
   function isUnlocked(itemDate){
-    // unlocked if the date is today or in the past
+    // unlocked if the date is today or in the past (compare local YYYY-MM-DD strings to avoid TZ issues)
+    if(!itemDate) return false;
     try{
-      return new Date(itemDate + "T00:00:00") <= new Date();
+      const today = todayISO();
+      return itemDate <= today;
     }catch(e){
       return false;
     }
@@ -469,7 +480,7 @@
       card.appendChild(titleEl);
       card.appendChild(dateEl);
 
-      if(isUnlocked(it.date)){
+      if(isUnlocked(it.date)){ 
         const badge = document.createElement('div');
         badge.className = 'unlocked-badge';
         badge.textContent = 'Open';
@@ -483,7 +494,7 @@
 
       card.style.cursor = 'pointer';
       card.onclick = () => {
-        if(!isUnlocked(it.date)){
+        if(!isUnlocked(it.date)){ 
           alert(`This letter unlocks on ${it.date}.`);
           return;
         }
@@ -496,9 +507,21 @@
 
   function openModal(item){
     modalLetter.textContent = `${item.letter} — ${item.title}`;
-    modalContent.textContent = item.text || '';
+    // allow the text to contain small HTML (links, line breaks). Use innerHTML intentionally for the configured content.
+    modalContent.innerHTML = item.text || '';
     modalAction.onclick = () => {
-      alert(item.text || "No action provided.");
+      // default action: show text — allow HTML to be visible already
+      if(item.text) {
+        // if there's a link, prefer opening it
+        const linkMatch = String(item.text).match(/https?:\/\/[^\s'\"]+/);
+        if(linkMatch){
+          window.open(linkMatch[0], "_blank", "noopener");
+          return;
+        }
+        alert(item.title || "No action provided.");
+        return;
+      }
+      alert(item.title || "No action provided.");
     };
     modalBackdrop.style.display = 'flex';
   }
@@ -545,11 +568,47 @@
     todayStrEl.textContent = now.toLocaleDateString();
   }
 
+  // ---------- Petals: spawn and animate ----------
+  function createPetal(){
+    const petal = document.createElement('div');
+    petal.className = 'petal';
+    const size = Math.floor(Math.random() * 18) + 10; // 10-28px
+    const left = Math.random() * 100; // vw
+    const duration = (Math.random() * 8) + 8; // 8-16s
+    const delay = Math.random() * 6; // 0-6s
+    const rotate = Math.floor(Math.random() * 360);
+    // blood-red colours for petals
+    // style petal with a blood-red gradient and an oval shape
+    petal.style.width = `${size}px`;
+    petal.style.height = `${Math.floor(size * (0.7 + Math.random()*0.4))}px`;
+    petal.style.left = `${left}vw`;
+    petal.style.borderRadius = '50% 40% 40% 50% / 60% 60% 40% 40%';
+    petal.style.background = `linear-gradient(135deg, #7b0000, #b30000)`;
+    petal.style.transform = `rotate(${rotate}deg)`;
+    petal.style.filter = `blur(${(Math.random()*1).toFixed(2)}px)`;
+    petal.style.animation = `fall ${duration}s linear ${delay}s 1 forwards`;
+    document.body.appendChild(petal);
+    // remove after animation ends
+    petal.addEventListener('animationend', () => {
+      try{ petal.remove(); }catch(e){}
+    });
+  }
+
+  function spawnPetals(count = 16){
+    for(let i=0;i<count;i++){ 
+      setTimeout(createPetal, Math.random()*1200);
+    }
+  }
+
   // Init
   renderLetters();
   updateCountdown();
   // try to load any configured music (autoplay not requested)
   if(CONFIG.musicUrl) loadMusic(CONFIG.musicUrl, false);
+
+  // spawn some petals on load and keep sprinkling a few over time
+  spawnPetals(24);
+  setInterval(() => spawnPetals(3), 2500);
 
   // Update countdown every minute
   setInterval(updateCountdown, 60*1000);
