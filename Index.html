@@ -218,7 +218,24 @@
     items: [
       { letter: "A", title: "A message from me", text: "Hey baby — I just wanted to start this A–Z journey by reminding you how much I love you.<br/><br/><a href=\"https://drive.google.com/file/d/1YQq4AI71qItfsO0qwPld98S7ux83hY4X/view?usp=drivesdk\" target=\"_blank\" rel=\"noopener\">Open the surprise (Drive)</a>" },
       { letter: "B", title: "Because of you", text: "Because of you, I smile more and love deeper.<br/><br/><a href=\"https://drive.google.com/file/d/1Bj289zT4NsBNBKBgYPGL1lWSL1xBfFd_/view?usp=drivesdk\" target=\"_blank\" rel=\"noopener\">Open the surprise (Drive)</a>"  },
-      { letter: "C", title: "Compliment Jar", text: "You deserve to be reminded how amazing you are. Click below!" },
+      { letter: "C", title: "Compliment Jar", text: `
+    You deserve to be reminded how amazing you are. Click below! 💕
+    <br/><br/>
+    <button onclick="showCompliment()" style="
+      background: var(--accent);
+      color: white;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 10px;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+    ">
+      Pick a compliment 💌
+    </button>
+    <p id="complimentText" style="margin-top:10px;color:var(--muted);font-size:1rem;"></p>
+  `,
+},
       { letter: "D", title: "Do not disturb", text: "Pick a date and time, no multitasking — let's talk." },
       { letter: "E", title: "Emoji Story", text: "A secret story told in emojis — can you decode it?" },
       { letter: "F", title: "Favorite Songs", text: "Here's a shared playlist — add your top 3 songs." },
@@ -643,6 +660,17 @@ document.getElementById("musicButton").addEventListener("click", function() {
   loadMusic(CONFIG.musicUrl, true);
   this.style.display = "none"; // Hides button after playing
 });
+  function showCompliment() {
+  const compliments = [
+    "You make every day brighter just by being you ☀️",
+    "Your smile could make the stars jealous ✨",
+    "You’re kind, gorgeous, and effortlessly lovable 💖",
+    "You make ordinary moments magical 💫",
+    "You’re my favorite notification every day 📱❤️"
+  ];
+  const random = compliments[Math.floor(Math.random() * compliments.length)];
+  document.getElementById("complimentText").innerHTML = random;
+  }
 </script>
  
 </body>
